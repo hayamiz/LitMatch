@@ -27,21 +27,26 @@
   (:nicknames #:lm)
   (:use :common-lisp)
   (:export #:litmatch
-		   ;; #:extract-vars
+		   #:extract-vars
 		   ))
 
 (in-package :litmatch)
 
 (defun extract-vars (matcher &optional init-vars)
-  (cond
-	((symbolp matcher)
-	 (let ((var (symbol-name matcher)))
-	   (when (and (> (length var) 1)
-				(string-equal "v%" (subseq var 0 2)))
-		 (union init-vars (list (intern (subseq var 2) *package*))))))
-	((consp matcher)
-	 (union init-vars (union (extract-vars (car matcher))
-							 (extract-vars (cdr matcher)))))))
+  (union init-vars
+		 (cond
+		   ((symbolp matcher)
+			(let ((var (symbol-name matcher)))
+			  (cond
+				((and (> (length var) 1)
+					  (string-equal "v%" (subseq var 0 2)))
+				 (list (intern (subseq var 2) *package*)))
+				((and (> (length var) 2)
+					  (string-equal "as%" (subseq var 0 3)))
+				 (list (intern (subseq var 3) *package*))))))
+		   ((consp matcher)
+			(union (extract-vars (car matcher))
+				   (extract-vars (cdr matcher)))))))
 
 (defmacro litmatch (value &rest clauses)
   (let ((vars nil)
@@ -56,6 +61,13 @@
 												  p-mat)
 											  (setf ,var p-val)
 											  t))
+							  vars)
+					,@(mapcar (lambda (var) `((and (consp p-mat)
+												   (eq ',(intern (concatenate 'string "AS%" (symbol-name var))
+																 *package*)
+													   (cdr p-mat)))
+											  (setf ,var p-val)
+											  (,partial-match-f p-val (car p-mat))))
 							  vars)
 					((eq ',(intern '_ *package*) p-mat) t)
 					((and (consp p-val) (consp p-mat))
