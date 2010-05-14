@@ -1,5 +1,7 @@
 ;;; LitMatch -- literal pattern matcher for common lisp
 
+;; LitMatch is licensed under the MIT lincense
+
 ;; Copyright (c) 2010, Yuto HAYAMIZU <y.hayamizu@gmail.com>
 
 ;; Permission is hereby granted, free of charge, to any person obtaining a copy
