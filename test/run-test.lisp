@@ -78,4 +78,19 @@
 		  (litmatch:litmatch '(1 2 3)
 			((1 2 3 . (%or nil (4) (4 5))) 'ok)))))
 
+(test test-multi-body
+  (is (eq 'ok
+		  (litmatch:litmatch '(1 (2 3))
+			((1 (2 3))
+			 'boom
+			 'ok))))
+  (is (eq 'ok
+		  (litmatch:litmatch '(1 (2 3))
+			((1 2 3)
+			 'boom
+			 'ng)
+			((1 (2 3))
+			 'booom
+			 'ok)))))
+
 (mapc 'run! '(litmatch-test))

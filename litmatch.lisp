@@ -22,6 +22,17 @@
 ;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ;; THE SOFTWARE.
 
+;;; Introduction
+
+;; LitMatch is a pattern matching library. It is very useful for
+;; switching control flow depending on complex data structure. For
+;; example, suppose that a variable "x" may hold '(a b (c d)) or '(a b
+;; (1 2)) and you want to distinguish these cases. You can write as follows:
+
+;;     (litmatch:litmatch x
+;;       ((a b (c d))  "this is a former case")
+;;       ((a b (1 2))  "this is a latter case"))
+
 
 (defpackage #:litmatch
   (:nicknames #:lm)
@@ -82,9 +93,9 @@
 	   (cond
 		 ,@(mapcar (lambda (clause)
 					 (let ((matcher (car clause))
-						   (body    (cadr clause)))
+						   (body    (cdr clause)))
 					   (if (eq matcher t)
-						   `(t ,body)
+						   `(t (progn ,@body))
 						   `((,partial-match-f ,value (quote ,matcher))
-							 ,body))))
+							 (progn ,@body)))))
 				   clauses))))))
