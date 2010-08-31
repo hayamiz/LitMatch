@@ -71,6 +71,21 @@ You can capture matched values by two ways. One is the 'v%' prefix.
 If you use a 'v%' prefixed symbol in a matcher, corresponding value is
 bound to the symbol and available in a body of the clause.
 
+Another way of capturing value is 'as%' prefix.
+
+> (litmatch '(1 2 3) ((1 2 (3 . as%matched-value)) matched-value))
+;=> 3
+
+> (litmatch '(1 2 3) ((1 . ((2 3) . as%matched-value)) matched-value))  ;;; (1 2 3) == (1 . (2 . (3 . nil)))
+;=> (2 3)
+
+'as%' prefix is always used in this form: (<matcher> . as%<symbol name>)
+
+This cons pair means "If the <matcher> matches with a corresponding
+value, bind it to <symbol name>." 'as%' prefix is useful when you want
+to capture a value and impose some conditions on it. 'v%' prefixed
+symbol just capture a value without checking its contents.
+
 
  Formal description of LitMatch syntax
 ---------------------------------------
