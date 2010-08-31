@@ -1,0 +1,86 @@
+ LitMatch - Yet Another Pattern Matching Library
+=================================================
+
+ Introduction
+--------------
+
+LitMatch is the pattern matching library for Common Lisp. It was made
+for writing pattern patching as if you write just literals. Let's see
+examples.
+
+    (defun litmatch-sample1 (x)
+      (litmatch x
+        ((hello japan)	"x is (hello japan)")
+        ((hello world)	"x is (hello world)")
+        (t			"x is unknown")))
+
+Here is a sample function 'litmatch-sample1'. It contains one pattern
+matching expression containing three clauses.
+
+    > (litmatch-sample1 '(hello japan))
+    ;=> "x is (hello japan)"
+    
+    > (litmatch-sample1 '(hello world))
+    ;=> "x is (hello world)"
+    
+    > (litmatch-sample1 '(hello universe))
+    ;=> "x is unknown"
+
+You can try more complicated data structure.
+
+    (defun litmatch-sample2 (x)
+      (litmatch x
+        ((1 2 3 (4 5) 6)		"clause 1")
+        ((1 2 (3 (4 5) 6))		"clause 2")))
+
+    > (litmatch-sample2 '(1 2 3 (4 5) 6))
+    ;=> "clause 1"
+    
+    > (litmatch-sample2 '(1 2 (3 (4 5) 6)))
+    ;=> "clause 2"
+    
+    > (litmatch-sample2 '(1 (2 (3 (4 5) 6))))
+    ;=> NIL
+
+As you can see in last result, NIL is returned when there's no
+matching clause.
+
+The matcher '_'(underscore) matches with ANY data. If you use single T
+as a matcher, it works the same as underscore.
+
+> (litmatch 1 (_ 'OK))
+;=> OK
+
+> (litmatch '(1 2 3) ((1 2 _) 'OK))
+;=> OK
+
+> (litmatch '(1 2 3) ((1 . _) 'OK))  ;;; (1 2 3) == (1 . (2 . (3 . nil)))
+;=> OK
+
+You can capture matched values by two ways. One is the 'v%' prefix.
+
+> (litmatch 1 (v%matched-value matched-value))
+;=> 1
+
+> (litmatch '(1 2 3) ((1 2 v%matched-value) matched-value))
+;=> 3
+
+> (litmatch '(1 2 3) ((1 . v%matched-value) matched-value))  ;;; (1 2 3) == (1 . (2 . (3 . nil)))
+;=> (2 3)
+
+If you use a 'v%' prefixed symbol in a matcher, corresponding value is
+bound to the symbol and available in a body of the clause.
+
+
+ Formal description of LitMatch syntax
+---------------------------------------
+
+(litmatch:litmatch <matched-value>
+  <clauses>)
+
+<matched-value>	:= <expr>
+<clauses>	:= <clause> *
+<clause>	:= (<matcher> <body>)
+<matcher>	:= literal expression with _(undescore) matchers, 'v%' prefixed symbols and 'as%' prefixed symbols
+<body>		:= <expr> *
+<expr>		:= any valid lisp expression
