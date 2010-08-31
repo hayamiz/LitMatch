@@ -50,7 +50,21 @@
 			(bar 'ng)
 			(t 'ok)))))
 
+(test test-no-match
+  (is (eq nil
+		  (litmatch:litmatch 1)))
+  (is (eq nil
+		  (litmatch:litmatch 1
+			(2 'ng))))
+  )
+
 (test test-any
+  (is (eq 'ok
+		  (litmatch:litmatch nil
+			(_ 'ok))))
+  (is (eq 'ok
+		  (litmatch:litmatch t
+			(_ 'ok))))
   (is (eq 'ok
 		  (litmatch:litmatch '(1 2 (3 foo))
 			((1 2 (3 . _)) 'ok))))
